@@ -65,6 +65,28 @@ MODELS = {
         'gpu_tier': 'A100-40GB',
         'memory_gb': 18,
         'accuracy_baseline': 91
+    },
+    'llama-3.1-8b': {
+        'id': 'meta-llama/Llama-3.1-8B-Instruct',
+        'name': 'Llama 3.1 8B',
+        'size': '8B',
+        'context_window': 128000,
+        'training_time_base': 8,
+        'cost_base': 0.60,
+        'gpu_tier': 'A100-40GB',
+        'memory_gb': 24,
+        'accuracy_baseline': 93
+    },
+    'llama-3.1-70b': {
+        'id': 'meta-llama/Llama-3.1-70B-Instruct',
+        'name': 'Llama 3.1 70B',
+        'size': '70B',
+        'context_window': 128000,
+        'training_time_base': 15,
+        'cost_base': 2.50,
+        'gpu_tier': 'H100-80GB',
+        'memory_gb': 160,
+        'accuracy_baseline': 96
     }
 }
 

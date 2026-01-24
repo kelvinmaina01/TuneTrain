@@ -34,21 +34,38 @@ const models = [
 ];
 
 const ModelShowcase: React.FC = () => {
+    const [activeIndex, setActiveIndex] = React.useState(0);
+
     return (
         <section className="section-container">
             <div className="section-header-centered">
                 <span className="section-tag-premium">Model Zoo</span>
                 <h2 className="section-title-large">Train the best open models</h2>
             </div>
-            <div className="model-grid-curated">
+
+            <div className="accordion-slider-container">
                 {models.map((model, index) => (
-                    <div key={index} className="model-card-premium glass">
-                        <div className="model-card-header">
-                            <span className="model-creator">{model.creator}</span>
-                            <span className="model-size-badge">{model.size}</span>
+                    <div
+                        key={index}
+                        className={`accordion-slider-item ${index === activeIndex ? 'active' : ''}`}
+                        onClick={() => setActiveIndex(index)}
+                    >
+                        {/* Active Content View */}
+                        <div className="accordion-content-panel">
+                            <div className="accordion-badge-row">
+                                <span className="accordion-creator">{model.creator}</span>
+                                <span className="accordion-size">{model.size}</span>
+                            </div>
+                            <h3 className="accordion-title">{model.name}</h3>
+                            <p className="accordion-desc">{model.description}</p>
+                            <button className="btn-text-only">Select Model →</button>
                         </div>
-                        <h3 className="model-name-alt">{model.name}</h3>
-                        <p className="model-description-alt">{model.description}</p>
+
+                        {/* Collapsed Vertical Tab View */}
+                        <div className="accordion-vertical-tab">
+                            <span className="vertical-index">0{index + 1}</span>
+                            <span className="vertical-label">{model.name}</span>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -57,3 +74,4 @@ const ModelShowcase: React.FC = () => {
 };
 
 export default ModelShowcase;
+

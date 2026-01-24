@@ -5,12 +5,17 @@
             "src": "frontend/package.json",
             "use": "@vercel/static-build",
             "config": {
-                "distDir": "."
+                "distDir": "dist"
             }
         },
         {
             "src": "api/main.py",
-            "use": "@vercel/python"
+            "use": "@vercel/python",
+            "config": {
+                "includeFiles": [
+                    "deploy/**"
+                ]
+            }
         }
     ],
     "routes": [
@@ -21,22 +26,6 @@
         {
             "src": "/assets/(.*)",
             "dest": "/frontend/dist/assets/$1"
-        },
-        {
-            "src": "/logo.png",
-            "dest": "/frontend/dist/logo.png"
-        },
-        {
-            "src": "/manifest.json",
-            "dest": "/frontend/dist/manifest.json"
-        },
-        {
-            "src": "/sw.js",
-            "dest": "/frontend/dist/sw.js"
-        },
-        {
-            "src": "/favicon.svg",
-            "dest": "/frontend/dist/favicon.svg"
         },
         {
             "handle": "filesystem"

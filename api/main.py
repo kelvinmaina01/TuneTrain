@@ -16,7 +16,7 @@ from typing import Optional
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -32,6 +32,7 @@ from deploy import (
     generate_package,
     recommend_model,
 )
+from deploy.tools.processor import adapter_factory
 from deploy.training import (
     generate_training_notebook,
     save_notebook,
@@ -46,6 +47,9 @@ app = FastAPI(
     description="Automated SLM Fine-Tuning Pipeline",
     version="0.1.0",
 )
+
+# API Router
+router = APIRouter(prefix="/api")
 
 allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000,http://127.0.0.1:8000")
 allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",")]
@@ -389,7 +393,7 @@ async def health():
     return {"status": "ok", "message": "Deploy API is running"}
 
 
-@app.post("/upload", response_model=SessionResponse)
+@router.post("/upload", response_model=SessionResponse)
 async def upload_file(file: UploadFile = File(...)):
     """Upload a dataset file and return a session_id for subsequent requests."""
     # Enforce session limits to prevent memory exhaustion
@@ -405,8 +409,9 @@ async def upload_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Invalid filename")
     
     ext = os.path.splitext(filename)[1].lower()
-    if ext != ".jsonl":
-        raise HTTPException(status_code=400, detail="Only JSONL format is supported. Please upload a .jsonl file.")
+    ALLOWED_EXTENSIONS = {".jsonl", ".txt", ".pdf"}
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"Unsupported format {ext}. Supported: {', '.join(ALLOWED_EXTENSIONS)}")
     
     MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB max
     session_id = str(uuid.uuid4())[:8]
@@ -436,8 +441,32 @@ async def upload_file(file: UploadFile = File(...)):
     
     try:
         state = create_empty_state(file_path, "")
-        result = ingest_data(state)
-        state.update(result)
+        
+        # If it's not JSONL, use the processor to synthesize dataset
+        if ext != ".jsonl":
+            try:
+                # Read content for processor
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                    content_str = f.read()
+                
+                raw_data = adapter_factory(file_path, content_str)
+                state["raw_data"] = raw_data
+                state["num_rows"] = len(raw_data)
+                state["sample_rows"] = raw_data[:5]
+                
+                # Mock stats per dataset
+                state["stats"] = {
+                    "total_examples": len(raw_data),
+                    "quality": "Good",
+                    "avg_turns": 2.0,
+                    "has_system_prompts": True,
+                    "is_synthesized": True
+                }
+            except Exception as e:
+                state["error_msg"] = f"Processing failed: {str(e)}"
+        else:
+            result = ingest_data(state)
+            state.update(result)
         
         if state.get("error_msg"):
             if os.path.exists(file_path):
@@ -476,7 +505,7 @@ async def upload_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail=f"Failed to parse file: {str(e)}")
 
 
-@app.post("/recommend")
+@router.post("/recommend")
 async def recommend(request: RecommendRequest):
     """Analyze dataset and recommend the best model based on user task and deployment target."""
     session_id = request.session_id
@@ -537,7 +566,7 @@ class AddSystemPromptRequest(BaseModel):
     system_prompt: str
 
 
-@app.post("/add-system-prompt")
+@router.post("/add-system-prompt")
 async def add_system_prompt(request: AddSystemPromptRequest):
     """Add a system prompt to all conversations in the dataset."""
     session_id = request.session_id
@@ -601,7 +630,7 @@ async def add_system_prompt(request: AddSystemPromptRequest):
     }
 
 
-@app.get("/download-dataset/{session_id}")
+@router.get("/download-dataset/{session_id}")
 async def download_dataset(session_id: str):
     """Download the dataset file (with any modifications like system prompts)."""
     if session_id not in sessions:
@@ -628,7 +657,7 @@ async def download_dataset(session_id: str):
     )
 
 
-@app.post("/analyze")
+@router.post("/analyze")
 async def analyze(request: AnalyzeRequest):
     """
     Legacy endpoint - Run ingestion, validation, and analysis on the uploaded file.
@@ -668,7 +697,7 @@ async def analyze(request: AnalyzeRequest):
     }
 
 
-@app.get("/sample-data/{session_id}")
+@router.get("/sample-data/{session_id}")
 async def get_sample_data(session_id: str, limit: int = 100):
     """Get sample rows from the uploaded dataset."""
     if session_id not in sessions:
@@ -693,7 +722,7 @@ async def get_sample_data(session_id: str, limit: int = 100):
     return result
 
 
-@app.post("/plan")
+@router.post("/plan")
 async def plan(request: PlanRequest):
     """Create training plan based on recommendation."""
     session_id = request.session_id
@@ -759,7 +788,7 @@ async def plan(request: PlanRequest):
     }
 
 
-@app.post("/generate", response_model=GenerateResponse)
+@router.post("/generate", response_model=GenerateResponse)
 async def generate(request: GenerateRequest):
     """Generate the training package."""
     session_id = request.session_id
@@ -787,7 +816,7 @@ async def generate(request: GenerateRequest):
     )
 
 
-@app.get("/download/{session_id}")
+@router.get("/download/{session_id}")
 async def download(session_id: str):
     """Download the generated training package as a ZIP file."""
     package_path = None
@@ -819,7 +848,7 @@ async def download(session_id: str):
     )
 
 
-@app.get("/session/{session_id}")
+@router.get("/session/{session_id}")
 async def get_session(session_id: str):
     """Get the current state of a session."""
     if session_id not in sessions:
@@ -860,7 +889,7 @@ def _get_current_step(state: dict) -> str:
 # COLAB NOTEBOOK GENERATION
 # ============================================================================
 
-@app.post("/generate-colab", response_model=ColabResponse)
+@router.post("/generate-colab", response_model=ColabResponse)
 async def generate_colab_notebook(request: ColabRequest):
     """Generate a Google Colab notebook for training. Requires /plan to be completed first."""
     session_id = request.session_id
@@ -923,7 +952,7 @@ async def generate_colab_notebook(request: ColabRequest):
         raise HTTPException(status_code=500, detail=f"Failed to generate notebook: {str(e)}")
 
 
-@app.get("/download-notebook/{session_id}")
+@router.get("/download-notebook/{session_id}")
 async def download_notebook(session_id: str):
     """Download the generated Colab notebook."""
     mapping = load_package_mapping()
@@ -946,6 +975,8 @@ async def download_notebook(session_id: str):
 # ============================================================================
 # RUN
 # ============================================================================
+
+app.include_router(router)
 
 if __name__ == "__main__":
     import uvicorn

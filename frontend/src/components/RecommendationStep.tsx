@@ -48,6 +48,7 @@ const RecommendationStep: React.FC = () => {
     if (!selectedModel) return null;
 
     const scorePercent = Math.round((selectedModel.score || 0.85) * 100);
+    const isLLM = selectedModel.size.includes('B') && parseInt(selectedModel.size) >= 8;
 
     return (
         <section className="step-content active">
@@ -61,23 +62,29 @@ const RecommendationStep: React.FC = () => {
                 <div className="rec-grid">
                     {/* Primary Recommendation */}
                     <div className="card primary-rec">
-                        <div className="rec-badge">Best Match</div>
+                        <div className="rec-badge-group">
+                            <div className="rec-badge">Best Match</div>
+                            <div className={`tier-badge ${isLLM ? 'llm' : 'slm'}`}>
+                                {isLLM ? 'Powerful LLM' : 'Efficient SLM'}
+                            </div>
+                        </div>
                         <div className="rec-header">
                             <div className="rec-model-info">
                                 <h3 className="rec-model-name">{selectedModel.model_name}</h3>
-                                <span className="rec-model-size">{selectedModel.size}</span>
+                                <span className="rec-model-size">{selectedModel.size} Parameter Model</span>
                             </div>
                             <div className="rec-score-ring">
                                 <svg viewBox="0 0 36 36">
                                     <defs>
                                         <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                            <stop offset="0%" style={{ stopColor: '#3b82f6' }} />
-                                            <stop offset="100%" style={{ stopColor: '#2563eb' }} />
+                                            <stop offset="0%" style={{ stopColor: '#FF8C00' }} />
+                                            <stop offset="100%" style={{ stopColor: '#FFA500' }} />
                                         </linearGradient>
                                     </defs>
                                     <path className="score-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                     <path
                                         className="score-fill"
+                                        stroke="url(#scoreGradient)"
                                         strokeDasharray={`${scorePercent}, 100`}
                                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                                     />
@@ -101,29 +108,32 @@ const RecommendationStep: React.FC = () => {
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                     <polyline points="14 2 14 8 20 8"></polyline>
                                 </svg>
-                                <span>Context Window: <strong>{selectedModel.context_window || '8K'}</strong></span>
+                                <span>Optimization: <strong>Production-Ready</strong></span>
                             </div>
                         </div>
                     </div>
 
                     {/* Alternatives */}
                     <div className="card alternatives-card">
-                        <h4 className="card-title">Alternative Models</h4>
-                        <p className="alternatives-hint">Click a model to learn more</p>
+                        <h4 className="card-title">Discovery</h4>
+                        <p className="alternatives-hint">Compare with other architecture tiers</p>
                         <div className="alternatives-list">
-                            {allModels.map((model) => (
-                                <button
-                                    key={model.model_id}
-                                    className={`alternative-item ${selectedModel.model_id === model.model_id ? 'active' : ''}`}
-                                    onClick={() => setSelectedModel(model)}
-                                >
-                                    <div className="alt-model-info">
-                                        <span className="alt-model-name">{model.model_name}</span>
-                                        <span className="alt-model-size">{model.size}</span>
-                                    </div>
-                                    <div className="alt-score">{Math.round((model.score || 0.8) * 100)}%</div>
-                                </button>
-                            ))}
+                            {allModels.map((model) => {
+                                const modelIsLLM = model.size.includes('B') && parseInt(model.size) >= 8;
+                                return (
+                                    <button
+                                        key={model.model_id}
+                                        className={`alternative-item ${selectedModel.model_id === model.model_id ? 'active' : ''} ${modelIsLLM ? 'tier-llm' : 'tier-slm'}`}
+                                        onClick={() => setSelectedModel(model)}
+                                    >
+                                        <div className="alt-model-info">
+                                            <span className="alt-model-name">{model.model_name}</span>
+                                            <span className="alt-model-size">{model.size}</span>
+                                        </div>
+                                        <div className="alt-score">{Math.round((model.score || 0.8) * 100)}%</div>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
@@ -137,11 +147,10 @@ const RecommendationStep: React.FC = () => {
                     </svg>
                     Back
                 </button>
-                <button className="btn btn-primary" onClick={() => setStep(4)}>
-                    Start Training
+                <button className="btn btn-primary btn-visionary" onClick={() => setStep(4)}>
+                    <span>Build & Deploy Model</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
                     </svg>
                 </button>
             </div>

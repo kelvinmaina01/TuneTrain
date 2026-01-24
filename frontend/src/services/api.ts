@@ -5,7 +5,7 @@ import type {
     ColabResponse
 } from '../types/api';
 
-const API_BASE = ''; // Backend is served from the same host in production
+const API_BASE = '/api'; // Backend endpoints are prefixed with /api
 
 export const api = {
     async uploadFile(file: File): Promise<SessionResponse> {

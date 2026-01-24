@@ -2,15 +2,15 @@ import React from 'react';
 import { ArrowRight, Check, Terminal as TerminalIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import { useSession } from '../context/SessionContext.tsx';
+import { useAuth } from '../context/AuthContext.tsx';
 
 const Hero: React.FC = () => {
-    const { isAuthenticated, login } = useSession();
+    const { isAuthenticated, login } = useAuth();
 
     const handleStartProject = (e: React.MouseEvent) => {
         if (!isAuthenticated) {
             e.preventDefault();
-            login();
+            login('demo@tunetrain.ai'); // Pass default email for mock login
         }
     };
 
@@ -26,16 +26,11 @@ const Hero: React.FC = () => {
 
                 <h1 className="hero-title-main">
                     <span className="hero-line-1">Turn raw data into</span><br />
-                    <span className="hero-line-2 gradient-text">production-ready</span><br />
-                    <span className="hero-line-3 typing-container">
-                        <span className="typing-text">AI systems without writing code.</span>
-                    </span>
+                    <span className="hero-line-2">production-ready AI systems</span>
                 </h1>
 
                 <p className="hero-subtitle-large">
-                    Upload your dataset, and we'll build, train, and deploy your model automatically. <br />
-                    <span className="highlight-white">No coding. No guesswork. No infrastructure costs.</span><br />
-                    Get a production-ready model in under 15 minutes.
+                    Build, train, and deploy domain-specific Small Language Models (SLMs) in minutes.
                 </p>
 
                 <div className="hero-cta-centered">
@@ -43,6 +38,9 @@ const Hero: React.FC = () => {
                         <span>Start Your Project</span>
                         <ArrowRight size={18} />
                     </Link>
+                    <a href="https://calendly.com/tunetrain" className="btn-outline">
+                        <span>Book a Demo</span>
+                    </a>
                 </div>
             </div>
 

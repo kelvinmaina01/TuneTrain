@@ -3,96 +3,103 @@
    ============================================================================ */
 
 :root {
-    /* Supabase Dark Palette + Custom Accent #5C5DDC */
-    --bg-base: #171717;
-    --bg-surface: #1c1c1c;
-    --bg-elevated: #212121;
-    --bg-hover: #262626;
-    --bg-active: #2a2a2a;
+    /* Deploy - Pure Black & Orange Palette */
+    --bg-base: #000000;
+    --bg-surface: #0a0a0a;
+    --bg-elevated: #111111;
+    --bg-hover: #1a1a1a;
+    --bg-active: #222222;
 
     /* Text */
-    --text-primary: #ededed;
-    --text-secondary: #a1a1a1;
-    --text-tertiary: #707070;
-    --text-muted: #525252;
+    --text-primary: #FFFFFF;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #71717a;
+    --text-muted: #52525b;
 
-    /* Accents */
-    --accent: #5C5DDC;
-    --accent-hover: #7375e8;
-    --accent-muted: rgba(92, 93, 220, 0.1);
-    --accent-subtle: rgba(92, 93, 220, 0.05);
+    /* Accents - Solid Orange */
+    --accent: #FF8C00;
+    --accent-hover: #FFA500;
+    --accent-muted: rgba(255, 140, 0, 0.1);
+    --accent-subtle: rgba(255, 140, 0, 0.05);
 
     /* Border */
-    --border: rgba(255, 255, 255, 0.06);
-    --border-strong: rgba(255, 255, 255, 0.1);
-    --border-accent: rgba(92, 93, 220, 0.3);
+    --border: rgba(255, 255, 255, 0.1);
+    --border-strong: rgba(255, 255, 255, 0.2);
+    --border-accent: #FF8C00;
 
     /* Status */
     --success: #3ecf8e;
-    /* Supabase Green */
     --error: #f43f5e;
     --warning: #f59e0b;
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.8);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.9);
+    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 1);
 
     /* Radius */
     --radius-sm: 4px;
-    --radius-md: 6px;
-    --radius-lg: 12px;
-    --radius-xl: 20px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --radius-xl: 32px;
 
     /* Typography */
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 
-    /* Glass Effect */
-    --glass-bg: rgba(15, 15, 20, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-blur: blur(16px);
+    /* Glass Effect (Solid dark) */
+    --glass-bg: rgba(0, 0, 0, 0.9);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-blur: blur(0px);
+    /* Remove blur for pure look */
 
     /* Transitions */
     --ease: cubic-bezier(0.4, 0, 0.2, 1);
-    --duration: 250ms;
+    --duration: 300ms;
 }
 
-/* Light mode */
+/* Light Theme Configuration */
 [data-theme="light"] {
-    --bg-base: #f8fafc;
-    --bg-surface: #ffffff;
-    --bg-elevated: #ffffff;
-    --bg-hover: #f1f5f9;
-    --bg-active: #e2e8f0;
+    /* Deploy - Clean White & Orange Palette */
+    --bg-base: #ffffff;
+    --bg-surface: #f4f4f5;
+    /* Zinc-100 */
+    --bg-elevated: #e4e4e7;
+    /* Zinc-200 */
+    --bg-hover: #fae8d1;
+    /* Very light orange tint for hover */
+    --bg-active: #ffe4bc;
 
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-tertiary: #64748b;
-    --text-muted: #94a3b8;
+    /* Text */
+    --text-primary: #18181b;
+    /* Zinc-900 */
+    --text-secondary: #3f3f46;
+    /* Zinc-700 - Darker for contrast */
+    --text-tertiary: #71717a;
+    /* Zinc-500 - Darker for contrast */
+    --text-muted: #a1a1aa;
+    /* Zinc-400 */
 
-    --accent: #2563eb;
-    --accent-hover: #3b82f6;
-    --accent-muted: rgba(37, 99, 235, 0.1);
-    --accent-subtle: rgba(37, 99, 235, 0.05);
+    /* Accents - Retain Identity but ensure contrast */
+    --accent: #F97316;
+    /* Slightly darker orange for white bg legibility */
+    --accent-hover: #EA580C;
+    --accent-muted: rgba(249, 115, 22, 0.15);
+    --accent-subtle: rgba(249, 115, 22, 0.08);
 
-    --border: rgba(0, 0, 0, 0.08);
-    --border-strong: rgba(0, 0, 0, 0.12);
-    --border-accent: rgba(37, 99, 235, 0.4);
+    /* Border */
+    --border: #e4e4e7;
+    --border-strong: #d4d4d8;
+    --border-accent: #F97316;
 
-    --error: #dc2626;
-    --error-muted: rgba(220, 38, 38, 0.1);
-    --warning: #d97706;
-    --success: #16a34a;
-    --success-muted: rgba(22, 163, 74, 0.1);
+    /* Glass Effect (Light frost) */
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(0, 0, 0, 0.05);
 
+    /* Shadows - softer for light mode */
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-
-    /* Glass Effect Light Mode */
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 /* ============================================================================
@@ -131,8 +138,7 @@ body {
 }
 
 .section-container {
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
     padding: 60px 24px;
 }
 
@@ -141,10 +147,7 @@ body {
 }
 
 .gradient-text {
-    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--accent);
 }
 
 /* ============================================================================
@@ -160,14 +163,12 @@ body {
 }
 
 .nav-container {
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
     padding: 0 24px;
     height: 72px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
 }
 
 .logo {
@@ -388,9 +389,7 @@ body {
 
 .main-content {
     flex: 1;
-    max-width: 1200px;
     width: 100%;
-    margin: 0 auto;
     padding: 56px 40px 80px;
 }
 
@@ -3526,4 +3525,85 @@ body {
         font-size: 16px;
         /* Prevent zoom on iOS */
     }
+}
+
+/* ============================================================================
+   GEN-2: VISIONARY STYLES (LLM & MULTI-FORMAT)
+   ============================================================================ */
+
+.rec-badge-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.tier-badge {
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+}
+
+.tier-badge.slm {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.tier-badge.llm {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.alternative-item.tier-llm.active {
+    box-shadow: 0 0 0 2px #8b5cf6;
+    border-color: #8b5cf6;
+}
+
+.btn-visionary {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+    color: white !important;
+    border: none !important;
+    padding: 14px 28px !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    letter-spacing: 0.02em;
+    box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.5);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.btn-visionary:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 35px -5px rgba(139, 92, 246, 0.6);
+}
+
+.btn-visionary svg {
+    margin-left: 10px;
+    transition: transform 0.3s;
+}
+
+.btn-visionary:hover svg {
+    transform: translateX(3px);
+}
+
+/* Specific styling for the synthesized dataset state */
+.validation-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.validation-title::after {
+    content: "GEN-2";
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: white;
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 800;
 }

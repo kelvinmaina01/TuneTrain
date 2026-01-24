@@ -11,8 +11,6 @@ interface SessionState {
     selectedTask: string | null;
     selectedDeployment: string | null;
     theme: 'light' | 'dark';
-    isAuthenticated: boolean;
-    user: { name: string; email: string; avatar?: string } | null;
 }
 
 interface SessionContextType extends SessionState {
@@ -25,13 +23,13 @@ interface SessionContextType extends SessionState {
     setSelectedDeployment: (target: string | null) => void;
     toggleTheme: () => void;
     resetSession: () => void;
-    login: () => void;
-    logout: () => void;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+
+
     const [state, setState] = useState<SessionState>({
         sessionId: null,
         currentStep: 1,
@@ -43,8 +41,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         selectedDeployment: null,
         theme: (localStorage.getItem('deploy-theme') as 'light' | 'dark') ||
             (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
-        isAuthenticated: false,
-        user: null,
     });
 
     useEffect(() => {
@@ -80,24 +76,8 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const setSelectedDeployment = (target: string | null) => setState(s => ({ ...s, selectedDeployment: target }));
     const toggleTheme = () => setState(s => ({ ...s, theme: s.theme === 'light' ? 'dark' : 'light' }));
 
-    const login = () => {
-        // Simulate a brief network delay for realism
-        setTimeout(() => {
-            setState(s => ({
-                ...s,
-                isAuthenticated: true,
-                user: { name: 'Alex Researcher', email: 'alex@labiq.ai', avatar: '/avatar-placeholder.png' }
-            }));
-        }, 600);
-    };
-
-    const logout = () => setState(s => ({
+    const resetSession = () => setState(s => ({
         ...s,
-        isAuthenticated: false,
-        user: null
-    }));
-
-    const resetSession = () => setState({
         sessionId: null,
         currentStep: 1,
         analysisData: null,
@@ -106,10 +86,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         allModels: [],
         selectedTask: null,
         selectedDeployment: null,
-        theme: state.theme,
-        isAuthenticated: state.isAuthenticated,
-        user: state.user
-    });
+    }));
 
     return (
         <SessionContext.Provider value={{
@@ -123,8 +100,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             setSelectedDeployment,
             toggleTheme,
             resetSession,
-            login,
-            logout
         }}>
             {children}
         </SessionContext.Provider>
@@ -136,3 +111,4 @@ export const useSession = () => {
     if (!context) throw new Error('useSession must be used within a SessionProvider');
     return context;
 };
+

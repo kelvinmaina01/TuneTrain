@@ -1,9 +1,11 @@
 import React from 'react';
-import { Github, Twitter, Linkedin, Mail, ArrowUp } from 'lucide-react';
+import { Github, Twitter, Linkedin, Mail, ArrowUp, Sun, Moon } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import Logo from './Logo.tsx';
+import Logo from './Logo';
+import { useTheme } from '../context/ThemeContext';
 
 const DetailedFooter: React.FC = () => {
+    const { theme, toggleTheme } = useTheme();
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -14,7 +16,7 @@ const DetailedFooter: React.FC = () => {
                 <div className="footer-brand-column">
                     <Logo />
                     <p className="footer-tagline">
-                        AI-powered research intelligence platform transforming how teams analyze data and make discoveries.
+                        Powering the next generation of AI systems
                     </p>
                     <div className="footer-socials">
                         <a href="#" aria-label="Twitter" className="social-link"><Twitter size={18} /></a>
@@ -58,18 +60,37 @@ const DetailedFooter: React.FC = () => {
             <div className="footer-bottom">
                 <div className="footer-bottom-content">
                     <p className="footer-copyright">
-                        &copy; {new Date().getFullYear()} <strong>Deploy AI</strong>. All rights reserved.
+                        &copy; 2026 <strong>Deploy</strong>. All rights reserved.
                     </p>
                     <div className="footer-legal-links">
                         <Link to="/privacy">Privacy Policy</Link>
                         <Link to="/terms">Terms of Service</Link>
                         <Link to="/security">Security</Link>
                     </div>
-                    <button className="back-to-top" onClick={scrollToTop} aria-label="Back to top">
+
+                    <button
+                        className="theme-toggle-fixed"
+                        aria-label="Toggle theme"
+                        onClick={toggleTheme}
+                        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                    >
+                        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
+
+                    <button className="back-to-top" aria-label="Back to top" onClick={scrollToTop} title="Scroll to top">
                         <ArrowUp size={20} />
                     </button>
                 </div>
             </div>
+            <div className="mega-footer-container">
+                <div className="mega-footer-content">
+                    <div className="mega-logo-wrapper">
+                        <img src="/logo.png" alt="Deploy Logo" className="mega-rotating-logo" />
+                    </div>
+                    <h2 className="mega-brand-text">deploy</h2>
+                </div>
+            </div>
+
         </footer>
     );
 };

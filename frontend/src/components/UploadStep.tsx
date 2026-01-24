@@ -9,10 +9,14 @@ const UploadStep: React.FC = () => {
     const [file, setFile] = useState<File | null>(null);
 
     const handleFileSelect = async (selectedFile: File) => {
-        if (!selectedFile.name.endsWith('.jsonl')) {
-            setError('Please upload a JSONL file. Other formats are not supported.');
+        const allowedExtensions = ['.jsonl', '.txt', '.pdf'];
+        const ext = selectedFile.name.substring(selectedFile.name.lastIndexOf('.')).toLowerCase();
+
+        if (!allowedExtensions.includes(ext)) {
+            setError('Unsupported format. Please upload .jsonl, .txt, or .pdf files.');
             return;
         }
+
         setError(null);
         setFile(selectedFile);
         setIsUploading(true);
@@ -80,13 +84,13 @@ const UploadStep: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="upload-text">
-                                    <span className="upload-main">Drop your JSONL file here</span>
-                                    <span className="upload-sub">or <span className="upload-browse">browse files</span></span>
+                                    <span className="upload-main">Drop your dataset here</span>
+                                    <span className="upload-sub">PDF, TXT, or JSONL supported</span>
                                 </div>
                                 <input
                                     type="file"
                                     id="fileInput"
-                                    accept=".jsonl"
+                                    accept=".jsonl,.txt,.pdf"
                                     hidden
                                     onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
                                 />
@@ -128,8 +132,14 @@ const UploadStep: React.FC = () => {
                                     </svg>
                                 </div>
                                 <div className="validation-details">
-                                    <div className="validation-title">Format Validated</div>
-                                    <div className="validation-meta">OpenAI Chat format detected</div>
+                                    <div className="validation-title">
+                                        {analysisData.stats?.is_synthesized ? 'Synthetic Dataset Generated' : 'Format Validated'}
+                                    </div>
+                                    <div className="validation-meta">
+                                        {analysisData.stats?.is_synthesized
+                                            ? 'Auto-converted using Deploy-Oracle'
+                                            : 'OpenAI Chat format detected'}
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -208,13 +218,13 @@ const UploadStep: React.FC = () => {
                                 <line x1="12" y1="16" x2="12" y2="12"></line>
                                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
                             </svg>
-                            <span>Format Requirements</span>
+                            <span>Input Support</span>
                         </div>
                         <ul className="requirements-list">
-                            <li><span className="req-check">✓</span><span>JSONL format with <code>messages</code> array</span></li>
-                            <li><span className="req-check">✓</span><span>Minimum 50 examples <span className="req-note">(100-1000 recommended)</span></span></li>
-                            <li><span className="req-check">✓</span><span>Each message: <code>role</code> and <code>content</code></span></li>
-                            <li><span className="req-check">✓</span><span>Valid roles: <code>system</code>, <code>user</code>, <code>assistant</code></span></li>
+                            <li><span className="req-check">✓</span><span><b>Raw Knowledge</b>: Upload .pdf or .txt</span></li>
+                            <li><span className="req-check">✓</span><span><b>Chat Data</b>: Upload .jsonl</span></li>
+                            <li><span className="req-check">✓</span><span><b>Auto-Synthesis</b>: Direct-to-AI conversion</span></li>
+                            <li><span className="req-check">✓</span><span><b>Minimum</b>: 50 examples generated</span></li>
                         </ul>
                     </div>
 
@@ -224,12 +234,12 @@ const UploadStep: React.FC = () => {
                                 <polyline points="16 18 22 12 16 6"></polyline>
                                 <polyline points="8 6 2 12 8 18"></polyline>
                             </svg>
-                            <span>Example Format</span>
+                            <span>Preview</span>
                         </div>
-                        <pre className="code-block"><code>{`{"messages": [
-  {"role": "user", "content": "..."},
-  {"role": "assistant", "content": "..."}
-]}`}</code></pre>
+                        <pre className="code-block"><code>{`// .txt example
+Raw text will be converted
+to synthetic conversations
+automatically.`}</code></pre>
                     </div>
                 </aside>
             </div>

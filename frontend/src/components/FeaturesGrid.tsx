@@ -35,25 +35,34 @@ const features = [
 ];
 
 const FeaturesGrid: React.FC = () => {
+    // Duplicating features for seamless marquee loop
+    const marqueeFeatures = [...features, ...features];
+
     return (
         <section className="section-container">
             <div className="section-header-centered">
                 <span className="section-tag-premium">Capabilities</span>
                 <h2 className="section-title-large">Enterprise-ready AI tools</h2>
             </div>
-            <div className="features-bento-grid">
-                {features.map((feature, index) => (
-                    <div key={index} className="feature-card-premium glass">
-                        <div className="feature-icon-wrapper-alt">
-                            {feature.icon}
+
+            <div className="features-marquee-container">
+                <div className="features-marquee-track">
+                    {marqueeFeatures.map((feature, index) => (
+                        <div key={index} className="feature-card-premium glass marquee-item">
+                            <div className="feature-icon-wrapper-alt">
+                                {feature.icon}
+                            </div>
+                            <h3 className="feature-title-alt">{feature.title}</h3>
+                            <p className="feature-description-alt">{feature.description}</p>
                         </div>
-                        <h3 className="feature-title-alt">{feature.title}</h3>
-                        <p className="feature-description-alt">{feature.description}</p>
-                    </div>
-                ))}
+                    ))}
+                </div>
+                <div className="marquee-fade-left"></div>
+                <div className="marquee-fade-right"></div>
             </div>
         </section>
     );
 };
 
 export default FeaturesGrid;
+
