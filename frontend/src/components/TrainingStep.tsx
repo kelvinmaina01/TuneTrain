@@ -11,12 +11,38 @@ const TrainingStep: React.FC = () => {
     const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    const [progressLog, setProgressLog] = useState<string[]>([]);
+
+    React.useEffect(() => {
+        if (isGenerating) {
+            setProgressLog([]);
+            const logs = [
+                "> Initializing environment...",
+                "> Analyzing dataset schema...",
+                "> Optimizing hyperparameters...",
+                "> Configuring LoRA adapters...",
+                "> Generating training script...",
+                "> Finalizing package..."
+            ];
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < logs.length) {
+                    setProgressLog(prev => [...prev, logs[i]]);
+                    i++;
+                }
+            }, 800);
+            return () => clearInterval(interval);
+        }
+    }, [isGenerating]);
+
     const handleColabGenerate = async () => {
         if (!sessionId) return;
         setIsGenerating(true);
         setError(null);
         try {
             await api.createPlan(sessionId, selectedTask!, selectedDeployment!, selectedModel?.model_id);
+            // Simulate delay for effect if API is too fast
+            await new Promise(r => setTimeout(r, 4500));
             const result = await api.generateColab(sessionId);
             setColabUrl(result.colab_url || null);
             setNotebookReady(true);
@@ -33,6 +59,7 @@ const TrainingStep: React.FC = () => {
         setError(null);
         try {
             await api.createPlan(sessionId, selectedTask!, selectedDeployment!, selectedModel?.model_id);
+            await new Promise(r => setTimeout(r, 4500));
             const result = await api.generatePackage(sessionId);
             setDownloadUrl(result.download_url);
             setPackageReady(true);
@@ -51,8 +78,29 @@ const TrainingStep: React.FC = () => {
                 <p>Choose how you want to train your model</p>
             </div>
 
+            {/* Terminal Loader */}
+            {isGenerating && (
+                <div className="card terminal-card" style={{ maxWidth: '600px', margin: '0 auto', background: '#0d0d0d', border: '1px solid #333', fontFamily: 'monospace' }}>
+                    <div style={{ display: 'flex', gap: '6px', padding: '12px', borderBottom: '1px solid #333' }}>
+                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ff5f56' }} />
+                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ffbd2e' }} />
+                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#27c93f' }} />
+                    </div>
+                    <div style={{ padding: '20px', minHeight: '200px', color: '#00ff00' }}>
+                        {progressLog.map((log, i) => (
+                            <div key={i} style={{ marginBottom: '8px', opacity: 0, animation: 'fadeIn 0.3s forwards' }}>{log}</div>
+                        ))}
+                        <div className="typing-cursor" style={{ display: 'inline-block', width: '8px', height: '14px', background: '#00ff00', animation: 'blink 1s infinite' }} />
+                    </div>
+                    <style>{`
+                        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+                        @keyframes fadeIn { to { opacity: 1; } }
+                    `}</style>
+                </div>
+            )}
+
             {/* Training Options */}
-            {!notebookReady && !packageReady && (
+            {!isGenerating && !notebookReady && !packageReady && (
                 <div id="trainingOptions">
                     <div className="training-grid">
                         {/* Colab Option */}

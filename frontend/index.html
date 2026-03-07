@@ -11,6 +11,17 @@
     rel="stylesheet">
   <meta name="theme-color" content="#000000" />
   <title>Deploy - Fine-tune SLMs 2x Faster</title>
+  <!-- Cleanup legacy Service Workers -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+          console.log('Legacy service worker unregistered');
+        }
+      });
+    }
+  </script>
 </head>
 
 <body>

@@ -135,26 +135,35 @@ def enforce_session_limit():
 
 def reload_raw_data_if_needed(session: dict) -> bool:
     """Reload raw_data from file if it's None. Returns True if successful."""
+    print(f"DEBUG: Reloading data. Session keys: {list(session.keys())}")
     state = session.get("state")
     if not state:
+        print("DEBUG: No state in session")
         return False
     
     if state.get("raw_data") is not None:
         return True  # Already loaded
     
     file_path = session.get("file_path")
+    print(f"DEBUG: Checking file path: {file_path}")
     if not file_path or not os.path.exists(file_path):
+        print(f"DEBUG: File path missing or file does not exist: {file_path}")
         return False
     
     # Re-ingest the data
-    temp_state = create_empty_state(file_path, "")
-    result = ingest_data(temp_state)
-    
-    if result.get("error_msg"):
+    try:
+        temp_state = create_empty_state(file_path, "")
+        result = ingest_data(temp_state)
+        
+        if result.get("error_msg"):
+            print(f"DEBUG: Ingest error: {result.get('error_msg')}")
+            return False
+        
+        state["raw_data"] = result.get("raw_data")
+        return True
+    except Exception as e:
+        print(f"DEBUG: Exception reloading data: {e}")
         return False
-    
-    state["raw_data"] = result.get("raw_data")
-    return True
 
 def save_package_mapping(session_id: str, package_path: str):
     """Save session_id -> package_path mapping to persistent file."""
@@ -174,6 +183,46 @@ def load_package_mapping() -> dict:
             return {}
     return {}
 
+SESSIONS_FILE = os.path.join(OUTPUT_DIR, ".sessions.json")
+
+def save_sessions_to_disk():
+    """Save key session metadata to disk to persist across reloads."""
+    try:
+        # Create a shallow copy to avoid modifying active sessions during iteration
+        # We only save essential fields + state (without raw_data)
+        data_to_save = {}
+        for sid, sdata in sessions.items():
+            # Deep copy state to ensure we don't accidentally save raw_data if it's there
+            import copy
+            state_copy = copy.deepcopy(sdata.get("state", {}))
+            if state_copy:
+                state_copy["raw_data"] = None # Ensure raw data isn't saved
+            
+            data_to_save[sid] = {
+                "file_path": sdata.get("file_path"),
+                "filename": sdata.get("filename"),
+                "original_filename": sdata.get("original_filename"),
+                "created_at": sdata.get("created_at"),
+                "state": state_copy
+            }
+        
+        with open(SESSIONS_FILE, "w") as f:
+            json.dump(data_to_save, f)
+    except Exception as e:
+        print(f"Warning: Failed to save sessions: {e}")
+
+def load_sessions_from_disk():
+    """Load sessions from disk on startup."""
+    global sessions
+    if os.path.exists(SESSIONS_FILE):
+        try:
+            with open(SESSIONS_FILE, "r") as f:
+                loaded = json.load(f)
+                sessions.update(loaded)
+            print(f"Loaded {len(loaded)} sessions from disk.")
+        except Exception as e:
+            print(f"Warning: Failed to load sessions: {e}")
+
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
 app.mount("/assets", StaticFiles(directory=os.path.join(FRONTEND_DIR, "assets")), name="assets")
 
@@ -187,12 +236,18 @@ async def startup_event():
     """Clean up any leftover files on startup."""
     import gc
     # Clean uploads folder on startup
-    if os.path.exists(UPLOAD_DIR):
-        for f in os.listdir(UPLOAD_DIR):
-            try:
-                os.remove(os.path.join(UPLOAD_DIR, f))
-            except OSError:
-                pass
+    # Clean uploads folder on startup
+    # Note: We commented out upload cleaning to allow session persistence
+    # if os.path.exists(UPLOAD_DIR):
+    #     for f in os.listdir(UPLOAD_DIR):
+    #         try:
+    #             os.remove(os.path.join(UPLOAD_DIR, f))
+    #         except OSError:
+    #             pass
+    
+    # Load persisted sessions
+    load_sessions_from_disk()
+    
     gc.collect()
 
 
@@ -488,6 +543,8 @@ async def upload_file(file: UploadFile = File(...)):
         state["raw_data"] = None
         sessions[session_id]["state"] = state
         
+        save_sessions_to_disk()
+        
         return {
             "session_id": session_id,
             "status": "uploaded",
@@ -548,6 +605,8 @@ async def recommend(request: RecommendRequest):
     # Clear raw_data after use to save memory
     state["raw_data"] = None
     sessions[session_id]["state"] = state
+    
+    save_sessions_to_disk()
     
     return {
         "session_id": session_id,

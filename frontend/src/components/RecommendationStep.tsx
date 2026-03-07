@@ -11,6 +11,7 @@ const RecommendationStep: React.FC = () => {
     } = useSession();
 
     const [isLoading, setIsLoading] = useState(!recommendationData);
+    const [animatedScore, setAnimatedScore] = useState(0);
 
     useEffect(() => {
         if (!recommendationData && sessionId && selectedTask && selectedDeployment) {
@@ -48,6 +49,13 @@ const RecommendationStep: React.FC = () => {
     if (!selectedModel) return null;
 
     const scorePercent = Math.round((selectedModel.score || 0.85) * 100);
+
+    useEffect(() => {
+        // Delay slightly to ensure transition plays after render
+        const timer = setTimeout(() => setAnimatedScore(scorePercent), 100);
+        return () => clearTimeout(timer);
+    }, [scorePercent]);
+
     const isLLM = selectedModel.size.includes('B') && parseInt(selectedModel.size) >= 8;
 
     return (
@@ -85,7 +93,8 @@ const RecommendationStep: React.FC = () => {
                                     <path
                                         className="score-fill"
                                         stroke="url(#scoreGradient)"
-                                        strokeDasharray={`${scorePercent}, 100`}
+                                        strokeDasharray={`${animatedScore}, 100`}
+                                        style={{ transition: 'stroke-dasharray 1.5s cubic-bezier(0.22, 1, 0.36, 1)' }}
                                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                                     />
                                 </svg>
