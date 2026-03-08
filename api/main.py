@@ -78,6 +78,37 @@ MAX_SESSIONS = 25  # Maximum concurrent sessions
 SESSION_EXPIRY_MINUTES = 30  # Sessions expire after 30 minutes
 
 
+def save_sessions():
+    """Save sessions to a persistent file."""
+    try:
+        # Create a serializable copy of sessions (exclude raw_data)
+        serializable = {}
+        for sid, data in sessions.items():
+            serializable[sid] = data.copy()
+            if "state" in serializable[sid]:
+                serializable[sid]["state"] = serializable[sid]["state"].copy()
+                serializable[sid]["state"]["raw_data"] = None
+        
+        with open(SESSION_FILE, "w") as f:
+            json.dump(serializable, f, indent=2)
+    except Exception as e:
+        print(f"DEBUG: Error saving sessions: {e}")
+
+def load_sessions():
+    """Load sessions from a persistent file."""
+    global sessions
+    if os.path.exists(SESSION_FILE):
+        try:
+            with open(SESSION_FILE, "r") as f:
+                loaded = json.load(f)
+                sessions.update(loaded)
+                print(f"DEBUG: Loaded {len(sessions)} sessions from {SESSION_FILE}")
+        except Exception as e:
+            print(f"DEBUG: Error loading sessions: {e}")
+
+SESSION_FILE = os.path.join(OUTPUT_DIR, ".sessions.json")
+load_sessions()
+
 def cleanup_expired_sessions():
     """Remove expired sessions to free memory."""
     if not sessions:
@@ -152,14 +183,29 @@ def reload_raw_data_if_needed(session: dict) -> bool:
     
     # Re-ingest the data
     try:
+        ext = os.path.splitext(file_path)[1].lower()
+        if ext != ".jsonl":
+            # Use the processor adapter for non-jsonl files (TXT, PDF, etc)
+            try:
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                    content_str = f.read()
+                raw_data = adapter_factory(file_path, content_str)
+                state["raw_data"] = raw_data
+                print(f"DEBUG: Successfully reloaded non-jsonl data for {session_id}")
+                return True
+            except Exception as e:
+                print(f"DEBUG: Adapter error during reload: {e}")
+                return False
+                
         temp_state = create_empty_state(file_path, "")
         result = ingest_data(temp_state)
         
         if result.get("error_msg"):
-            print(f"DEBUG: Ingest error: {result.get('error_msg')}")
+            print(f"DEBUG: Ingest error during reload: {result.get('error_msg')}")
             return False
         
         state["raw_data"] = result.get("raw_data")
+        print(f"DEBUG: Successfully reloaded jsonl data for {session_id}")
         return True
     except Exception as e:
         print(f"DEBUG: Exception reloading data: {e}")
@@ -541,9 +587,15 @@ async def upload_file(file: UploadFile = File(...)):
         # Memory optimization: clear raw_data after computing stats
         # We can reload from file when needed
         state["raw_data"] = None
-        sessions[session_id]["state"] = state
         
-        save_sessions_to_disk()
+        sessions[session_id] = {
+            "file_path": file_path,
+            "filename": file.filename,
+            "original_filename": file.filename,
+            "created_at": datetime.now().isoformat(),
+            "state": state,
+        }
+        save_sessions()
         
         return {
             "session_id": session_id,
@@ -679,6 +731,7 @@ async def add_system_prompt(request: AddSystemPromptRequest):
     # Clear raw_data after use to save memory
     state["raw_data"] = None
     sessions[session_id]["state"] = state
+    save_sessions()
     
     return {
         "session_id": session_id,

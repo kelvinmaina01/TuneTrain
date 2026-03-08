@@ -31,7 +31,7 @@ const WhatIf: React.FC = () => {
                             <svg className="visual-svg" viewBox="0 0 100 100">
                                 <rect x="30" y="30" width="40" height="40" rx="8" fill="none" stroke="var(--text-tertiary)" strokeWidth="1" opacity="0.3" />
                                 <circle className="animate-pulse-glow" cx="50" cy="50" r="15" fill="var(--accent-muted)" stroke="var(--accent)" strokeWidth="1.5" />
-                                <path className="animate-rotate-slow" d="M50 25 L50 35 M50 65 L50 75 M25 50 L35 50 M65 50 L75 50" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" transform-origin="50 50" />
+                                <path className="animate-rotate-slow" d="M50 25 L50 35 M50 65 L50 75 M25 50 L35 50 M65 50 L75 50" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" transformOrigin="50 50" />
                             </svg>
                         </div>
                         <h4 className="visual-card-title">Infra-Less</h4>

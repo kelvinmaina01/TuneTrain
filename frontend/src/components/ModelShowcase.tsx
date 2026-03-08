@@ -36,6 +36,18 @@ const models = [
 const ModelShowcase: React.FC = () => {
     const [activeIndex, setActiveIndex] = React.useState(0);
 
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            setActiveIndex((prev) => (prev + 1) % models.length);
+        }, 5000); // Rotate every 5 seconds
+
+        return () => clearInterval(interval);
+    }, []);
+
+    const handleItemClick = (index: number) => {
+        setActiveIndex(index);
+    };
+
     return (
         <section className="section-container">
             <div className="section-header-centered">
@@ -48,7 +60,7 @@ const ModelShowcase: React.FC = () => {
                     <div
                         key={index}
                         className={`accordion-slider-item ${index === activeIndex ? 'active' : ''}`}
-                        onClick={() => setActiveIndex(index)}
+                        onClick={() => handleItemClick(index)}
                     >
                         {/* Active Content View */}
                         <div className="accordion-content-panel">
@@ -74,4 +86,3 @@ const ModelShowcase: React.FC = () => {
 };
 
 export default ModelShowcase;
-
