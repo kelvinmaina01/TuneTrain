@@ -24,10 +24,6 @@
             "dest": "/api/main.py"
         },
         {
-            "src": "/assets/(.*)",
-            "dest": "/assets/$1"
-        },
-        {
             "handle": "filesystem"
         },
         {
