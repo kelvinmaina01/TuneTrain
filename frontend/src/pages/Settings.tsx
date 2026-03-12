@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext.tsx';
 import Layout from '../components/Layout';
-import { Save, Bell, User, Sun, Moon } from 'lucide-react';
+import { Save, Bell, User, Sun } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Settings: React.FC = () => {
